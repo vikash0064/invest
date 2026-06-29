@@ -1,0 +1,9 @@
+{
+  "watch": ["server"],
+  "ignore": [
+    "server/data/*",
+    "server/data/history.json",
+    "client/*"
+  ],
+  "ext": "js,mjs,json"
+}
