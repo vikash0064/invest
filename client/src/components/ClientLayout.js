@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import axios from 'axios';
+
+// Configure Axios baseURL for development vs production
+if (typeof window !== 'undefined') {
+  const isDev = window.location.hostname === 'localhost' && window.location.port === '3000';
+  axios.defaults.baseURL = isDev 
+    ? 'http://localhost:5000' 
+    : (process.env.NEXT_PUBLIC_SERVER_URL || '');
+}
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
