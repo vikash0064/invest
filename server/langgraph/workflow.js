@@ -78,47 +78,41 @@ async function collectProfile(state) {
   const details = await yahooFinanceService.getCompanyDetails(state.symbol);
   return {
     companyInfo: details.companyInfo,
+    financialAnalysis: details.financialAnalysis,
+    financialHistory: details.financialHistory,
+    newsList: details.newsList,
+    chartData: details.chartData,
     status: 'profile_collected'
   };
 }
 
 /**
- * Node 3: Collect Financial Data
+ * Node 3: Collect Financial Data (Reuses state from Node 2)
  */
 async function collectFinancials(state) {
-  console.log(`[LangGraph Node 3] Collecting financials for symbol: ${state.symbol}`);
-  // We already fetched details in parallel in the previous node to avoid redundant calls,
-  // but let's re-extract it properly based on state
-  const details = await yahooFinanceService.getCompanyDetails(state.symbol);
+  console.log(`[LangGraph Node 3] Reusing financials from state for symbol: ${state.symbol}`);
   return {
-    financialAnalysis: details.financialAnalysis,
-    financialHistory: details.financialHistory,
     status: 'financials_collected'
   };
 }
 
 /**
- * Node 4: Collect Latest News & Stock Chart Data
+ * Node 4: Collect Latest News & Stock Chart Data (Reuses state from Node 2)
  */
 async function collectNews(state) {
-  console.log(`[LangGraph Node 4] Collecting news and chart data for symbol: ${state.symbol}`);
-  const details = await yahooFinanceService.getCompanyDetails(state.symbol);
+  console.log(`[LangGraph Node 4] Reusing news and chart data from state for symbol: ${state.symbol}`);
   return {
-    newsList: details.newsList,
-    chartData: details.chartData,
     status: 'news_collected'
   };
 }
 
 /**
- * Node 5: Analyze Risks
+ * Node 5: Analyze Risks (Performs the complete analysis once)
  */
 async function analyzeRisks(state) {
-  console.log(`[LangGraph Node 5] Analyzing risks for: ${state.symbol}`);
-  // Analyze news sentiment first
+  console.log(`[LangGraph Node 5] Analyzing risks, growth, and recommendation for: ${state.symbol}`);
   const sentimentNews = await llmService.analyzeNewsSentiment(state.companyInfo, state.newsList);
   
-  // Perform analysis using LLM service (will return risks and swot)
   const fullAnalysis = await llmService.performCompleteAnalysis(
     state.companyInfo,
     state.financialAnalysis,
@@ -128,43 +122,29 @@ async function analyzeRisks(state) {
   return {
     newsSentiment: sentimentNews,
     riskAnalysis: fullAnalysis.risks,
+    growthAnalysis: fullAnalysis.growth,
+    recommendation: fullAnalysis.recommendation,
     swot: fullAnalysis.swot,
     status: 'risks_analyzed'
   };
 }
 
 /**
- * Node 6: Analyze Growth
+ * Node 6: Analyze Growth (Reuses analysis from Node 5)
  */
 async function analyzeGrowth(state) {
-  console.log(`[LangGraph Node 6] Analyzing growth for: ${state.symbol}`);
-  // We can extract growth from the full analysis we ran earlier or re-run.
-  // Re-running llmService.performCompleteAnalysis retrieves everything.
-  const fullAnalysis = await llmService.performCompleteAnalysis(
-    state.companyInfo,
-    state.financialAnalysis,
-    state.newsSentiment
-  );
-
+  console.log(`[LangGraph Node 6] Reusing growth analysis from state for: ${state.symbol}`);
   return {
-    growthAnalysis: fullAnalysis.growth,
     status: 'growth_analyzed'
   };
 }
 
 /**
- * Node 7: Generate Final Recommendation
+ * Node 7: Generate Final Recommendation (Reuses analysis from Node 5)
  */
 async function generateRecommendation(state) {
-  console.log(`[LangGraph Node 7] Generating final recommendation for: ${state.symbol}`);
-  const fullAnalysis = await llmService.performCompleteAnalysis(
-    state.companyInfo,
-    state.financialAnalysis,
-    state.newsSentiment
-  );
-
+  console.log(`[LangGraph Node 7] Reusing recommendation from state for: ${state.symbol}`);
   return {
-    recommendation: fullAnalysis.recommendation,
     status: 'recommendation_generated'
   };
 }
