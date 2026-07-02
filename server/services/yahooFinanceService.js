@@ -1,5 +1,20 @@
 import YahooFinance from 'yahoo-finance2';
-const yahooFinance = new YahooFinance();
+
+const yahooFinance = new YahooFinance({
+  suppressNotices: ['yahooSurvey', 'ripHistorical'],
+  fetchOptions: {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Origin': 'https://finance.yahoo.com',
+      'Referer': 'https://finance.yahoo.com'
+    }
+  }
+});
+
 
 /**
  * Service to interact with Yahoo Finance API (free, no API key required)
